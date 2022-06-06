@@ -4,13 +4,22 @@ const http = require("http");
 const PORT = process.env.PORT || 5000;
 //include the content of an endpont as json collection
 const todos = require("./todos");
+//import getRequestData function from utilsjs
+const getRequestData = require("./utils");
 //build the server
-const server = http.createServer(function (request, response) {
-  if (request.url === "/api/v1/todos" && request.method === "GET") {
+const server = http.createServer(async (request, response) => {
+  if (request.url === "/api/v1/todos" && request.method === "GET") { // GET requests
     response.writeHead(200, {
       "content-type": "application/json",
     });
     response.end(JSON.stringify(todos));
+  } else if (request.url === "/api/v1/todos" && request.method === "POST") { // POST requests
+    let req_body = await getRequestData(request)
+    todos.push(JSON.parse(req_body))
+    response.writeHead(201, {
+        "content-type": "application/json",
+    })
+    response.end(JSON.stringify(JSON.parse(req_body)))
   }
 });
 
