@@ -1,4 +1,4 @@
-getRequestData = async (req) => {
+getRequestData = (req) => {
   return new Promise((resolve, reject) => {
     try {
       let body = "";

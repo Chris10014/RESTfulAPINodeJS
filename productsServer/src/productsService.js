@@ -2,75 +2,76 @@
 const { reject } = require("lodash");
 const lodash = require("lodash");
 const productsList = require("./products.json").products;
-//import getRequestData function from utilsjs
-const getRequestData = require("./utils");
 
 
-const getProducts = async () => {
+const getProducts = (done) => {
   // get all products
- return new Promise((resolve, _) => resolve(productsList));
+  let error = null
+  return done(error, JSON.stringify(productsList));
 }
 
-const getProductsById = async (productId, done) => {
-  return new Promise ((resolve, reject) => {
+const getProductsById = (productId, done) => {
+ 
     let product = null;
+    let error = null;
     //get the product
     product = productsList.find((p) => p.id === parseInt(productId));
     // if product exist return product
-    if (product) {
-      resolve(product);      
-    } else { // if not return error
-      reject("Requested product doesn't exist..!");      
+    if (!product) {// if no product found return error
+      error = "Requested product doesn't exist..!";      
     }
-  })
+    return done(error, JSON.stringify(product));
 }
 
-const saveProduct = async (newProduct, done) => {
- // save a product
- return new Promise((resolve, _) => {
-   let newProductsList = null;
-    productsList.push(JSON.parse(newProduct));
-    newProductsList = getProducts()
-    resolve(newProductsList)
- })
-}
+const saveProduct = (newProduct, done) => {
+  // save a product
+  let product = null;
+  let error = null;
+  product = productsList.find(p => p.id === newProduct['id'])
+  if(!product) {
+  productsList.push(newProduct);
+  } else {
+    error = "Product already exists..!";
+  }
+  return done(error, JSON.stringify(productsList));
+};
  
 
-const updateProduct = async (productId, updateData, done) => {
+const updateProduct = (productId, updateData, done) => {
   // update the product list
-  return new Promise((resolve, reject) => {
-    let updatedProductList = null;
-    let product = productsList.find(p => p.id === productId)
-    if(product) {
-      // todo: update an item of an array
-
+    let product = null
+    let error = null
+    let res = null
+    let myObj = null
+    product = productsList.find((p) => p.id === parseInt(productId));
+    if(!product) {
+      error = "Requested product doesn't exist..!";
     } else {
-      reject("Requested product doesn't exist..!");
-    }
-  });
-
-  // done(null, JSON.stringify(updatedProductList));
+      myObj = JSON.parse(updateData)
+      
+      for (const key in myObj) {        
+        product[key] = myObj[key];      
+      }
+  }
+  return done(error, JSON.stringify(productsList))
 }
 
  // delete a product
 const deleteProduct = async (productId, done) => {
-  return new Promise ((resolve, reject) => {
-     let deletedProduct = null;
      //get product
-  let product = productsList.find((p) => p.id === parseInt(productId));
+     let product = null
+     let error = null
+  product = productsList.find((p) => p.id === parseInt(productId));
   // if product doesn't exist return an error
   if(!product) {
-    reject("Requested product doesn't exist..!");
+    error = "Requested product doesn't exist..!";
   } else { // else return the product
     // get index of the product
     index = productsList.indexOf(product)
     // delete the product from the array
-    deletedProduct = productsList.splice(index, 1);
-    // return the deleted product only
-    resolve(deletedProduct);
+    productsList.splice(index, 1);
   }
-
-  })
+  return done(error, JSON.stringify(productsList));
 }
 
 
